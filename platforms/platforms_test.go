@@ -282,6 +282,34 @@ func TestParseSelector(t *testing.T) {
 			},
 			formatted: joinNotEmpty("darwin", defaultArch),
 		},
+		{
+			input: "macOS:avx512",
+			expected: specs.Platform{
+				OS:           "darwin",
+				Architecture: defaultArch,
+				Features:     []string{"avx512"},
+			},
+			formatted: joinNotEmpty("darwin", defaultArch) + ":avx512",
+		},
+		{
+			input: "linux/s390x:avx512:cuda",
+			expected: specs.Platform{
+				OS:           "linux",
+				Architecture: "s390x",
+				Features:     []string{"avx512", "cuda"},
+			},
+			formatted: "linux/s390x:avx512:cuda",
+		},
+		{
+			input: "linux/s390x/v7:avx512:cuda1:cuda2",
+			expected: specs.Platform{
+				OS:           "linux",
+				Architecture: "s390x",
+				Variant:      "v7",
+				Features:     []string{"avx512", "cuda1", "cuda2"},
+			},
+			formatted: "linux/s390x/v7:avx512:cuda1:cuda2",
+		},
 	} {
 		t.Run(testcase.input, func(t *testing.T) {
 			if testcase.skip {
@@ -347,6 +375,12 @@ func TestParseSelectorInvalid(t *testing.T) {
 		},
 		{
 			input: "linux/arm/foo/bar", // too many components
+		},
+		{
+			input: "linux/arm/foo:bar:", // empty feature
+		},
+		{
+			input: "linux/arm/foo::bar", // empty feature
 		},
 	} {
 		t.Run(testcase.input, func(t *testing.T) {
